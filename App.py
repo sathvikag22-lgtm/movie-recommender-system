@@ -62,3 +62,23 @@ if st.button('recommend'):
     with col5:
         st.text(names[4])
         st.image(posters[4])
+import requests
+import pickle
+import streamlit as st
+
+def load_data(file_id, filename):
+    url = f"https://drive.google.com/uc?id={file_id}&export=download"
+
+    response = requests.get(url)
+    response.raise_for_status()
+
+    data = pickle.loads(response.content)
+    return data
+
+MOVIES_ID="https://drive.google.com/file/d/12uYE7Fb-XvuGwgj9jMhBLyPk3ThmCLJE/view?usp=drive_link"
+MOVIES_DICT_ID="https://drive.google.com/file/d/1AJbUVb0kdigjhQGcjTqFswxeDhIsDsmy/view?usp=drive_link"
+SIMILARITY_ID="https://drive.google.com/file/d/19AZEHzOtJ7YMGbbI5F0MGaUsThTWxc5V/view?usp=drive_link"
+
+movies = load_data(MOVIES_ID, "movies.pkl")
+movies_dict = load_data(MOVIES_DICT_ID, "movies_dict.pkl")
+similiarity = load_data(SIMILARITY_ID, "similiarity.pkl")
