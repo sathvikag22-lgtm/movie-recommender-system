@@ -62,23 +62,50 @@ if st.button('recommend'):
     with col5:
         st.text(names[4])
         st.image(posters[4])
-import requests
+
 import pickle
+import requests
 import streamlit as st
+import gdown
 
 def load_data(file_id, filename):
-    url = f"https://drive.google.com/uc?id={file_id}&export=download"
+    url = f"https://drive.google.com/uc?export=download&id={file_id}"
 
-    response = requests.get(url)
+    response = requests.get(url, timeout=60)
     response.raise_for_status()
 
-    data = pickle.loads(response.content)
-    return data
+    # Check whether Google Drive returned an HTML page
+    content_type = response.headers.get("Content-Type", "")
 
-MOVIES_ID="https://drive.google.com/file/d/12uYE7Fb-XvuGwgj9jMhBLyPk3ThmCLJE/view?usp=drive_link"
-MOVIES_DICT_ID="https://drive.google.com/file/d/1AJbUVb0kdigjhQGcjTqFswxeDhIsDsmy/view?usp=drive_link"
-SIMILARITY_ID="https://drive.google.com/file/d/19AZEHzOtJ7YMGbbI5F0MGaUsThTWxc5V/view?usp=drive_link"
+    if "text/html" in content_type.lower():
+        st.error(
+            f"Google Drive returned an HTML page instead of {filename}. "
+            "Check the file ID and sharing permissions."
+        )
+        st.stop()
 
+    try:
+        data = pickle.loads(response.content)
+        return data
+    except pickle.UnpicklingError:
+        st.error(
+            f"{filename} is not a valid pickle file. "
+            "Check that the Google Drive link points to the correct file."
+        )
+        st.stop()
+
+
+MOVIES_ID="12uYE7Fb-XvuGwgj9jMhBLyPk3ThmCLJE"
+MOVIES_DICT_ID="1AJbUVb0kdigjhQGcjTqFswxeDhIsDsmy"
+SIMILARITY_ID="19AZEHzOtJ7YMGbbI5F0MGaUsThTWxc5V"
 movies = load_data(MOVIES_ID, "movies.pkl")
 movies_dict = load_data(MOVIES_DICT_ID, "movies_dict.pkl")
 similiarity = load_data(SIMILARITY_ID, "similiarity.pkl")
+
+pickle_path = 'movies_dict.pkl'
+if not os.path.exists(pickle_path):
+    google_drive_url = 'https:\\google.com'
+
+    print("Downloading movies_dict.pkl Google Drive...")
+    gdown.download(google_drive_url,pickle_path, fuzzy = True)
+movies_dict = pickle.load(open(pickle_path,'rb'))
