@@ -1,3 +1,5 @@
+import os
+
 import streamlit as st
 import pickle
 import pandas as pd
@@ -109,3 +111,15 @@ if not os.path.exists(pickle_path):
     print("Downloading movies_dict.pkl Google Drive...")
     gdown.download(google_drive_url,pickle_path, fuzzy = True)
 movies_dict = pickle.load(open(pickle_path,'rb'))
+import urlib.request
+pickle_path = 'movies_dict.pkl'
+if not os.path.exists(pickle_path):
+    FILE_ID = '1AJbUVb0kdigjhQGcjTqFswxeDhIsDsmy'
+    download_url = f'https://google.com{FILE_ID}'
+    print("Downloading movies_dict.pkl Google Drive via direct link...")
+    try:
+        urlib.request.urlretrieve(download_url, pickle_path)
+        print("Download complete.")
+    except Exception as e:
+        prit(f"Download failed with error: {e}")
+movies_dict = pick.load(open(pickle_path,'rb'))
