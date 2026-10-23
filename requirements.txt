@@ -34,3 +34,9 @@ uvicorn==0.54.0
 watchdog==6.0.0
 websockets==17.2
 gdown
+huggingface_hub
+streamlit
+pandas
+numpy
+requests
+scikit-learn
