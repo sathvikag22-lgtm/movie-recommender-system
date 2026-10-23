@@ -35,7 +35,7 @@ def recommend(movie):
         recommended_posters.append(fetch_poster(movie_id))
     return recommended_movies,recommended_posters
 
-movies_dict = pickle.load(open('movies_dict.pkl.','rb'))
+movies_dict = pickle.load(open('movies_dict.pkl','rb'))
 movies = pd.DataFrame(movies_dict)
 
 similarity = pickle.load(open('similarity.pkl','rb'))
@@ -65,61 +65,22 @@ if st.button('recommend'):
         st.text(names[4])
         st.image(posters[4])
 
-import pickle
-import requests
 import streamlit as st
-import gdown
+import pickle
+from huggingface_hub import hf_hub_download
 
-def load_data(file_id, filename):
-    url = f"https://drive.google.com/uc?export=download&id={file_id}"
+REPO_ID = "sathvikag/movie-recommender-data"
 
-    response = requests.get(url, timeout=60)
-    response.raise_for_status()
+@st.cache_resource
+def load_data(filename):
+    file_path = hf_hub_download(
+        repo_id=REPO_ID,
+        filename=filename,
+        repo_type="dataset"
+    )
+    with open(file_path, "rb") as f:
+        return pickle.load(f)
 
-    # Check whether Google Drive returned an HTML page
-    content_type = response.headers.get("Content-Type", "")
-
-    if "text/html" in content_type.lower():
-        st.error(
-            f"Google Drive returned an HTML page instead of {filename}. "
-            "Check the file ID and sharing permissions."
-        )
-        st.stop()
-
-    try:
-        data = pickle.loads(response.content)
-        return data
-    except pickle.UnpicklingError:
-        st.error(
-            f"{filename} is not a valid pickle file. "
-            "Check that the Google Drive link points to the correct file."
-        )
-        st.stop()
-
-
-MOVIES_ID="12uYE7Fb-XvuGwgj9jMhBLyPk3ThmCLJE"
-MOVIES_DICT_ID="1AJbUVb0kdigjhQGcjTqFswxeDhIsDsmy"
-SIMILARITY_ID="19AZEHzOtJ7YMGbbI5F0MGaUsThTWxc5V"
-movies = load_data(MOVIES_ID, "movies.pkl")
-movies_dict = load_data(MOVIES_DICT_ID, "movies_dict.pkl")
-similiarity = load_data(SIMILARITY_ID, "similiarity.pkl")
-
-pickle_path = 'movies_dict.pkl'
-if not os.path.exists(pickle_path):
-    google_drive_url = 'https:\\google.com'
-
-    print("Downloading movies_dict.pkl Google Drive...")
-    gdown.download(google_drive_url,pickle_path, fuzzy = True)
-movies_dict = pickle.load(open(pickle_path,'rb'))
-import urlib.request
-pickle_path = 'movies_dict.pkl'
-if not os.path.exists(pickle_path):
-    FILE_ID = '1AJbUVb0kdigjhQGcjTqFswxeDhIsDsmy'
-    download_url = f'https://google.com{FILE_ID}'
-    print("Downloading movies_dict.pkl Google Drive via direct link...")
-    try:
-        urlib.request.urlretrieve(download_url, pickle_path)
-        print("Download complete.")
-    except Exception as e:
-        prit(f"Download failed with error: {e}")
-movies_dict = pick.load(open(pickle_path,'rb'))
+movies = load_data("movies.pkl")
+movies_dict = load_data("movies_dict.pkl")
+similarity = load_data("similarity.pkl")
