@@ -35,10 +35,24 @@ def recommend(movie):
         recommended_posters.append(fetch_poster(movie_id))
     return recommended_movies,recommended_posters
 
-movies_dict = pickle.load(open('movies_dict.pkl','rb'))
-movies = pd.DataFrame(movies_dict)
+from huggingface_hub import hf_hub_download
 
-similarity = pickle.load(open('similarity.pkl','rb'))
+REPO_ID = "sathvikag/movie-recommender-data"
+
+@st.cache_resource
+def load_pickle(filename):
+    file_path = hf_hub_download(
+        repo_id=REPO_ID,
+        filename=filename,
+        repo_type="dataset"
+    )
+    with open(file_path, "rb") as f:
+        return pickle.load(f)
+
+movies_dict = load_pickle("movies_dict.pkl")
+movies = pd.DataFrame(movies_dict)
+similarity = load_pickle("similarity.pkl")
+
 
 st.title('Movie Recommender System')
 
